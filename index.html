@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles/reset.css" />
+    <link rel="stylesheet" href="styles/main.css" />
+    <title>Your Library</title>
+    <link rel="icon" href="favicon.png" />
+    <script src="https://kit.fontawesome.com/ed247afa0e.js" crossorigin="anonymous"></script>
+</head>
+
+<body>
+    <div class="main-container">
+        <div class="top">
+            <header class="header">
+                <h1 class="header-title">My Library</h1>
+                <div class="signin-wrapper">
+                    <button class="signin-btn">Login</button>
+                </div>
+            </header>
+            <main class="main">
+                <div>
+                </div>
+                <table class="book-status">
+                    <tr>
+                        <td class="book-status__item"><a class="status__selected" href="/">All books</a></td>
+                        <td class="book-status__item"><a href="/">Completed</a></td>
+                        <td class="book-status__item"><a href="/">Reading</a></td>
+                        <td class="book-status__item"><a href="/">Plan to read</a></td>
+                    </tr>
+                </table>
+                <div class="library">
+                    <form class="query-form">
+                        <table class="library__bookshelf">
+                            <tr>
+                                <th class="library__book__info-text table-header"><a href="/">Title</a></th>
+                                <th class="library__book__info-text table-header"><a href="/">Author</a></th>
+                                <th class="library__book__info-text table-header"><a href="/">Pages</a></th>
+                                <th class="library__book__info-text table-header"><a href="/">Status</a></th>
+                                <th class="library__book__info-text table-header"><a href="/">Notes</a></th>
+                                <th class="library__book__info-text table-header">&nbsp;</th>
+                            </tr>
+                        </table>
+                        <fieldset class="library__book-submission">
+                            <input id="book__title" type="text" placeholder="title" />
+                            <input id="book__author" type="text" placeholder="author" />
+                            <input id="book__pages" type="text" placeholder="pages" />
+                            <select name="read-status" id="book__read-status">
+                                <option value="read">read</option>
+                                <option value="reading">reading</option>
+                                <option value="to-read">plan to read</option>
+                            </select>
+                            <textarea id="book__notes"></textarea>
+                            <input id="library__book-submit" type="button" value="Submit" />
+                        </fieldset>
+                    </form>
+                </div>
+            </main>
+        </div>
+        <footer class="footer">
+            <p class="footer-author">Maintained by
+                <a target="_blank" href="https://github.com/bvrbryn445">B.B.
+                    Antipolo <i class="fab fa-github"></i>
+                </a>
+            </p>
+        </footer>
+    </div>
+</body>
+<script src="library.js"></script>
+
+</html>

@@ -1,0 +1,114 @@
+/*** COLOR VARIABLES ***/
+:root {
+    --color-athens-gray: #eee;
+    --color-concrete: #f2f2f2;
+}
+
+
+/*** GLOBAL SELECTORS ***/
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Helvetica, sans-serif;
+}
+
+a, button {
+    cursor: pointer;
+}
+
+a {
+    text-decoration: none;
+}
+
+th {
+    border: 1px solid rgba(0, 0, 0, 0.342);
+}
+
+textarea {
+    resize: none;
+}
+
+/*** MAIN BODY ***/
+.main-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    width: 100vw;
+    height: 100vh;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.header-title {
+    font-size: clamp(2em, 3vw, 4em);
+}
+
+.top, .footer {
+    max-width: 1200px;
+    width: 100%;
+    padding: 5em 2em;
+}
+
+.book-status__item {
+    padding: 1.5em .75em;
+}
+
+.status__selected, a:hover {
+    text-decoration: underline;
+}
+
+.footer {
+    display: inline-block;
+}
+
+.footer-author>a {
+    color: #000;
+}
+
+.footer-author>a:hover {
+    color: #0000ff;
+}
+
+/*** FORM ***/
+.query-form {
+    max-height: 90vh;
+}
+
+/*** LIBRARY ***/
+.library__bookshelf {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.library__bookshelf tr:nth-child(even) {
+    background-color: var(--color-concrete);
+}
+
+.library__bookshelf tr:not(:first-child):hover {
+    background-color: var(--color-athens-gray);
+}
+
+.library__bookshelf td, .library__bookshelf th {
+    border: 1px solid var(--color-athens-gray);
+    padding: 8px;
+    text-align: center;
+}
+
+.library__book-submission {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    padding: 1em 0;
+}
+
+.edit-btn{
+    margin-right: 5px;
+}

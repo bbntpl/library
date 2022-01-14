@@ -21,8 +21,6 @@
                 </div>
             </header>
             <main class="main">
-                <div>
-                </div>
                 <table class="book-status">
                     <tr>
                         <td class="book-status__item"><a class="status__selected" href="/">All books</a></td>
@@ -31,31 +29,57 @@
                         <td class="book-status__item"><a href="/">Plan to read</a></td>
                     </tr>
                 </table>
-                <div class="library">
-                    <form class="query-form">
-                        <table class="library__bookshelf">
-                            <tr>
-                                <th class="library__book__info-text table-header"><a href="/">Title</a></th>
-                                <th class="library__book__info-text table-header"><a href="/">Author</a></th>
-                                <th class="library__book__info-text table-header"><a href="/">Pages</a></th>
-                                <th class="library__book__info-text table-header"><a href="/">Status</a></th>
-                                <th class="library__book__info-text table-header"><a href="/">Notes</a></th>
-                                <th class="library__book__info-text table-header">&nbsp;</th>
-                            </tr>
-                        </table>
-                        <fieldset class="library__book-submission">
-                            <input id="book__title" type="text" placeholder="title" />
-                            <input id="book__author" type="text" placeholder="author" />
-                            <input id="book__pages" type="text" placeholder="pages" />
-                            <select name="read-status" id="book__read-status">
-                                <option value="read">read</option>
-                                <option value="reading">reading</option>
-                                <option value="to-read">plan to read</option>
-                            </select>
-                            <textarea id="book__notes"></textarea>
-                            <input id="library__book-submit" type="button" value="Submit" />
+
+                <div class="header">
+                    <ul>
+                        <li></li>
+                    </ul>
+                    <form class="searchbar-form">
+                        <fieldset class="searchbar-wrapper">
+                            <i class="fa fa-search"></i>
+                            <input class="searchbar" type="text" placeholder="Search for title or author" />
                         </fieldset>
                     </form>
+                </div>
+                <div class="library">
+                    <div class="table">
+                        <div class="thead">
+                            <div class="tr">
+                                <div class="book__info-text th"><a href="/">Title</a></div>
+                                <div class="book__info-text th"><a href="/">Author</a></div>
+                                <div class="book__info-text th"><a href="/">Pages</a></div>
+                                <div class="book__info-text th"><a href="/">Status</a></div>
+                                <div class="book__info-text th"><a href="/">Notes</a></div>
+                                <div class="book__info-text th">&nbsp;</div>
+                            </div>
+                        </div>
+                        <div class="library__bookshelf tbody">
+                            <form class="tr library__book-submission">
+                                <div class="td">
+                                    <input id="book__title" type="text" placeholder="title" />
+                                </div>
+                                <div class="td">
+                                    <input id="book__author" type="text" placeholder="author" />
+                                </div>
+                                <div class="td">
+                                    <input id="book__pages" type="text" placeholder="pages" />
+                                </div>
+                                <div class="td">
+                                    <select name="read-status" id="book__read-status">
+                                        <option value="read">read</option>
+                                        <option value="reading">reading</option>
+                                        <option value="to-read">plan to read</option>
+                                    </select>
+                                </div>
+                                <div class="td">
+                                    <textarea id="book__notes"></textarea>
+                                </div>
+                                <div class="td">
+                                    <input id="library__book-submit" type="button" value="Submit" />
+                                </div>
+                            </form>
+                        </div>
+                    </div>
                 </div>
             </main>
         </div>

@@ -2,9 +2,14 @@
 :root {
     --color-gallery: #eee;
     --color-athens-gray: #ddd;
-    --color-concrete: #f2f2f2;
+    --color-papaya-whip: #FFEFD5;
+    --color-peach-puff: #ffdab9;
+    --color-peach: #ffe5b4;
+    --color-coral: #ff7f50;
+    --color-light-salmon: #ffa07a;
+    --color-orangered: #ff4500;
+    --color-nutmeg-wood-finish: #6d3500;
 }
-
 
 /*** GLOBAL SELECTORS ***/
 * {
@@ -12,10 +17,11 @@
 }
 
 body {
-    font-family: Helvetica, sans-serif;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 15px;
 }
 
-a, button {
+a, button, input[type='button'] {
     cursor: pointer;
 }
 
@@ -32,7 +38,7 @@ textarea {
 }
 
 /*** REUSABLE ELEMENTS ***/
-.table-row{
+.table-row {
     display: table-row;
 }
 
@@ -45,7 +51,7 @@ textarea {
     width: 100vw;
     min-height: 100vh;
     height: max-content;
-    background-color: var(--color-gallery);
+    background-color: var(--color-papaya-whip);
 }
 
 .header {
@@ -65,34 +71,53 @@ textarea {
     padding: 5em 2em;
 }
 
-.status__selected, a:hover {
-    text-decoration: underline;
+/*** SUBHEADER ***/
+
+.status__selected {
+    background-color: #fff;
 }
 
-/*** SUBHEADER ***/
-.book-status{
+.status__not-selected {
+    background: var(--color-peach-puff);
+}
+
+.book-status {
     background-color: #fff;
     margin: 1.5em 0;
 }
 
-.book-status__item {
+.book-status__filter{
     padding: 10px 12px;
-    border: 1px solid var(--color-gallery);
+    color: var(--color-nutmeg-wood-finish);
+    border: none;
+    background: transparent;
+    text-transform: uppercase;
+    font-size: inherit;
+    height: 100%;
+    width: 100%;
 }
-.serachbar-form{
+
+.book-status__item:hover{
     background-color: #fff;
 }
-.searchbar-wrapper{
+
+.searchbar-form {
+    background-color: #fff;
+}
+
+.searchbar-wrapper {
     display: flex;
     align-items: center;
     border: 2px solid var(--color-gallery);
     padding: 0px 2px;
 }
-.searchbar-wrapper > i {
+
+.searchbar-wrapper>i {
     padding: 1px 2px;
     position: absolute;
     color: var(--color-athens-gray);
 }
+
 .searchbar {
     border: none;
     padding: 5px 0 5px 20px;
@@ -107,30 +132,28 @@ textarea {
 
 /*** PSEUDO TABLE ***/
 .table {
-    display:table;
+    display: table;
     width: 100%;
     border-collapse: collapse;
     table-layout: fixed;
     max-height: 60vh;
 }
 
-.thead
-{
-	display:table-header-group;
-	font-weight:bold;
-}
-.tbody
-{
-	display:table-row-group;
-}
-.tr
-{
-	display:table-row;
+.thead {
+    display: table-header-group;
+    font-weight: bold;
 }
 
-.td, .th
-{
-	display:table-cell;
+.tbody {
+    display: table-row-group;
+}
+
+.tr {
+    display: table-row;
+}
+
+.td, .th {
+    display: table-cell;
 }
 
 .td, .th, .tr {
@@ -138,44 +161,56 @@ textarea {
     text-align: center;
 }
 
-.library__bookshelf .td{
+.library__bookshelf .td {
     width: 100%;
 }
 
-.tr .th:nth-child(3){
+.tr .th:nth-child(3) {
     max-width: 100px;
 }
 
 .tr:nth-child(even) {
-    background-color: var(--color-concrete);
+    background-color: var(--color-peach-puff);
 }
 
 .tr:not(:first-child):hover {
-    background-color: var(--color-athens-gray);
+    background-color: var(--color-peach);
 }
 
-.table .th{
-    border: 1px solid var(--color-athens-gray);
+.table .th, .td {
+    border: 1px solid var(--color-gallery);
 }
 
-.book__pages--info{
+.book__pages--info {
     max-width: 100px;
 }
 
-.book__notes--info{
+.book__notes--info {
     max-width: 200px;
 }
 
-.library__book-submission, .library__book-submission > div {
+.book__info-text{
+    background-color: var(--color-peach-puff);
+}
+
+.book__info-text > a{
+    color: var(--color-nutmeg-wood-finish);
+}
+
+.book__info-text > a:hover{
+    text-decoration: underline;
+}
+
+.library__book-submission, .td {
     vertical-align: middle;
 }
 
-.library__book-submission > div > * {
+.book-input > *:not(.btns-container) {
     width: 100%;
     max-width: 130px;
 }
 
-.edit-btn {
+.edit-btn, .save-btn {
     margin-right: 5px;
 }
 
@@ -185,5 +220,5 @@ textarea {
 }
 
 .footer-author>a {
-    color: #0000ff;
+    color: var(--color-nutmeg-wood-finish);
 }

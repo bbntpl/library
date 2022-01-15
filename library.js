@@ -1,29 +1,30 @@
 /*** DATABASE ***/
 const myLibrary = [{
+    id: 1,
     title: 'The Body Keeps The Score',
     author: 'Bessel van der Kolk',
     pages: '464',
     readStatus: 'plan to read',
     notes: '',
-    id: 1
 },
 {
+    id: 2,
     title: 'Pro Git',
     author: '',
     pages: '261',
     readStatus: 'reading',
-    notes: '',
-    id: 2
+    notes: ''
 },
 {
+    id: 3,
     title: 'Atomic Habits',
     author: 'James Clear',
     pages: '400',
     readStatus: 'read',
     notes: 'Best read of 2020',
-    id: 3
 }];
 
+// filtered bookshelf
 const myCurrentLibrary = myLibrary;
 
 const myLibraryStatus = {
@@ -42,26 +43,45 @@ const bookshelfEl = document.querySelector('.library__bookshelf');
 const bookTitleInput = document.getElementById('book__title');
 const bookAuthorInput = document.getElementById('book__author');
 const bookPagesInput = document.getElementById('book__pages');
-const bookReadStatusInput = document.getElementById('book__read-status');
+const bookReadStatusInput = document.getElementById('book__readStatus');
 const bookNotesInput = document.getElementById('book__notes');
 
-// DOM buttons
+// DOM buttons and links
 const bookSubmitBtn = document.getElementById('library__book-submit');
+const bookFilterBtns = document.querySelectorAll('.book-status__filter');
 
 
 /*** HELPER FUNCTIONS ***/
-function createElementWithClass(tag, parent, className) {
+function createElementAndAppend(tag, parent, className) {
     const element = document.createElement(tag);
     parent.append(element);
-    element.classList.add(className);
+    if (Array.isArray(className)) {
+        element.classList.add(...className)
+    } else {
+        element.classList.add(className)
+    }
     return element;
 }
-function removeAllChildrenExceptLastChild(element) {
-    const elementChildren = element.childNodes;
-    while (element.firstChild) {
-        element.removeChild(elementChildren[elementChildren.length - 2]);
+function createElementAndInsertBefore(tag, parent, className) {
+    const element = document.createElement(tag);
+    parent.insertBefore(element, parent.lastChild);
+    if (Array.isArray(className)) {
+        element.classList.add(...className)
+    } else {
+        element.classList.add(className)
     }
+    return element;
 }
+function removeChildNodesExceptOneById(element, id) {
+    while (element.firstChild.className !== id) { element.removeChild(element.firstChild) }
+}
+function htmlToElement(html) {
+    var template = document.createElement('template');
+    html = html.trim(); // Never return a text node of whitespace as the result
+    template.innerHTML = html;
+    return template.content.firstChild;
+}
+
 /*** OBJECT CONSTRUCTOR ***/
 function Book(title, author, pages, status, notes, id) {
     this.id = id;
@@ -83,22 +103,23 @@ function removeBooksInTable() {
 
 //Update the element that presents as the bookshelf of the library
 function updateBookShelf() {
-    myLibrary.forEach((v, i) => updateBookRow(i));
+    myLibrary.forEach((v, i) => updateBookDisplay(i));
 }
 
 //update the bookshelf by adding a set of book info
-function updateBookRow(index) {
-    const newTableRow = createElementWithClass('div', bookshelfEl, 'tr');
+function updateBookDisplay(index) {
+    const newTableRow = createElementAndAppend('div', bookshelfEl, 'tr');
     const book = myCurrentLibrary[index];
     const bookId = myCurrentLibrary[index].id;
     for (const prop in book) {
         if (prop !== 'id') {
-            const newTableBookInfo = createElementWithClass('div', newTableRow, 'td');
+            const newTableBookInfo = createElementAndAppend('div', newTableRow, 'td');
             newTableBookInfo.classList.add(`book__${prop}--info`);
             newTableBookInfo.textContent = book[prop];
         }
     }
-    const newTableBookInfo = createElementWithClass('div', newTableRow, 'td');
+    const newTableBookInfo = createElementAndAppend('div', newTableRow, 'td');
+    newTableBookInfo.classList.add('btns-container');
     appendEditBook(newTableBookInfo, bookId);
     appendRemoveBook(newTableBookInfo, bookId);
 }
@@ -109,20 +130,27 @@ function redisplayBookshelf() {
     updateBookShelf();
 }
 
+//change class and text content to save btn
+function replaceClassNameAndText(element, oldClass, newClass, text) {
+    element.target.classList.remove(oldClass);
+    element.target.classList.add(newClass);
+    element.target.textContent = text;
+}
+
 //append button that allow to edit book information
 function appendEditBook(tableData, bookId) {
-    const editBtn = createElementWithClass('button', tableData, 'edit-btn');
-    editBtn.textContent = 'edit';
+    const editBtn = createElementAndAppend('button', tableData, 'edit-btn');
+    editBtn.textContent = 'Edit';
     editBtn.addEventListener('click', (e) => {
         e.preventDefault();
-        editBook(e, bookId);
+        toggleEditMode(e, bookId);
     });
 }
 
 //append button that allow to remove book
 function appendRemoveBook(tableData, bookId) {
-    const rmvBtn = createElementWithClass('button', tableData, 'rmv-btn');
-    rmvBtn.textContent = 'remove';
+    const rmvBtn = createElementAndAppend('button', tableData, 'rmv-btn');
+    rmvBtn.textContent = 'Remove';
     rmvBtn.addEventListener('click', (e) => {
         e.preventDefault();
         removeBook(bookId);
@@ -156,7 +184,7 @@ function submitBook() {
     const nextBookId = myLibraryStatus.totalBooks + 1;
     addBookToTheLibrary(bookTitleVal, bookAuthorVal, bookPagesVal, bookReadStatusVal, bookNotesVal, nextBookId);
     clearBookSubmissionInputs();
-    updateBookRow(myLibrary.length - 1);
+    updateBookDisplay(myLibrary.length - 1);
     incrementTotalBooks();
 }
 
@@ -169,54 +197,83 @@ function removeBook(bookId) {
     redisplayBookshelf();
 }
 
-function editBook(element, bookId) {
-    const tr = element.target.parentElement.parentElement;
-    if (element.target.className === 'edit-btn') {
-        element.target.classList.remove('edit-btn');
-        element.target.classList.add('save-btn');
-        element.target.textContent = 'Save';
-        //removeAllChildrenExceptLastChild(tr);
+function toggleEditMode(toggleBtn, bookId) {
+    //reference the grandparent of the passed element
+    const tr = toggleBtn.target.parentElement.parentElement;
 
-        const filteredLibrary = myLibrary.filter(o => o.id === bookId);
+    //get the object based on the prop that matches with the given value
+    const filteredLibrary = myLibrary.filter(o => o.id === bookId);
 
-        for (const prop of filteredLibrary[0]) {
-            const div = createElementWithClass('div', tr, 'td');
-            if (prop === 'readStatus') {
-
-            } else if (prop === 'notes') {
-
-            } else if (prop !== 'id') {
-                const textInput = createElementWithClass('div', tr, 'td');
-
-            }
-        }
-        const 
-
+    if (toggleBtn.target.className === 'edit-btn') {
+        editBook(tr, toggleBtn, filteredLibrary, bookId);
     } else {
-        //Get the className of the active form inputs
-        
-        element.target.classList.remove('save-btn');
-        element.target.classList.add('edit-btn');
-        element.target.textContent = 'Edit';
-        removeAllChildrenExceptLastChild(tr);
-        for (const prop of filteredLibrary[0]) {
-            if (prop === 'readStatus'){
+        updateBook(tr, toggleBtn, bookId);
+    }
+}
 
-            }
+function editBook(grandparentEl, toggleBtn, filteredLibrary, bookId) {
+    replaceClassNameAndText(toggleBtn, 'edit-btn', 'save-btn', 'Save');
+    removeChildNodesExceptOneById(grandparentEl, 'td btns-container');
+    //insert new children of inputs
+    for (const prop in filteredLibrary[0]) {
+        if (prop === 'id') continue;
+        //insert a div with td class element before the first child
+        const td = createElementAndInsertBefore('div', grandparentEl, ['td', 'book-input']);
+
+        //insert a child conditional to the prop key
+        if (prop === 'readStatus') {
+            const select = htmlToElement(`<select name="read-status" id="book__${prop}--edit${bookId}"></select>`)
+            const readStatusOptions = ['read', 'reading', 'plan to read'];
+            td.append(select);
+            readStatusOptions.forEach(v => {
+                select.append(htmlToElement(`<option value="${v}">${v}</option>`));
+            })
+        } else if (prop === 'notes') {
+            td.append(htmlToElement(`<textarea id="book__${prop}--edit${bookId}" placeholder="notes">${filteredLibrary[0][prop]}</textarea>`));
+        } else {
+            td.append(htmlToElement(`<input id="book__${prop}--edit${bookId}" type="text" placeholder="${prop}" value="${filteredLibrary[0][prop]}"/>`));
         }
     }
 }
 
-/*** APPEND INPUTS */
-function appendInput(tag,) {
+function updateBook(grandparentEl, toggleBtn, bookId) {
+    replaceClassNameAndText(toggleBtn, 'save-btn', 'edit-btn', 'Edit');
 
+    /* get the index of the filtered library that matches 
+    the given value based on the prop */
+    const index = myLibrary.map(o => o.id).indexOf(bookId);
+
+    //update the property of the the selected book
+    for (const prop in myLibrary[index]) {
+        if (prop === 'id') continue;
+        myLibrary[index][prop] = document.getElementById(`book__${prop}--edit${bookId}`).value;
+    }
+    removeChildNodesExceptOneById(grandparentEl, 'td btns-container');
+
+    //display the updated information as a children of the target element 
+    for (const prop in myLibrary[index]) {
+        if (prop !== 'id') {
+            const td = createElementAndInsertBefore('div', grandparentEl, 'td');
+            grandparentEl.classList.add(`book__${prop}--info`);
+            td.textContent = myLibrary[index][prop];
+        }
+    }
 }
 
+function filterBookshelf() {
+
+}
 
 /*** EVENT LISTENERS */
 bookSubmitBtn.addEventListener('click', (e) => {
     e.preventDefault();
     submitBook();
+});
+
+bookFilterBtns.forEach(el => {
+    el.addEventListener('click', () => {
+
+    });
 });
 
 /*** INITIALIZATION */

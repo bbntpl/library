@@ -23,10 +23,18 @@
             <main class="main">
                 <table class="book-status">
                     <tr>
-                        <td class="book-status__item"><a class="status__selected" href="/">All books</a></td>
-                        <td class="book-status__item"><a href="/">Completed</a></td>
-                        <td class="book-status__item"><a href="/">Reading</a></td>
-                        <td class="book-status__item"><a href="/">Plan to read</a></td>
+                        <td id="book-status__all" class="book-status__item status__selected">
+                            <button class="book-status__filter">All books</button>
+                        </td>
+                        <td id="book-status__read"class="book-status__item status__not-selected">
+                            <button class="book-status__filter">Completed</button>
+                        </td>
+                        <td id="book-status__reading"class="book-status__item status__not-selected">
+                            <button class="book-status__filter">Reading</button>
+                        </td>
+                        <td id="book-status__plan-to-read" class="book-status__item status__not-selected">
+                            <button class="book-status__filter">Plan to read</button>
+                        </td>
                     </tr>
                 </table>
 
@@ -55,26 +63,26 @@
                         </div>
                         <div class="library__bookshelf tbody">
                             <form class="tr library__book-submission">
-                                <div class="td">
+                                <div class="td book-input">
                                     <input id="book__title" type="text" placeholder="title" />
                                 </div>
-                                <div class="td">
+                                <div class="td book-input">
                                     <input id="book__author" type="text" placeholder="author" />
                                 </div>
-                                <div class="td">
+                                <div class="td book-input">
                                     <input id="book__pages" type="text" placeholder="pages" />
                                 </div>
-                                <div class="td">
-                                    <select name="read-status" id="book__read-status">
+                                <div class="td book-input">
+                                    <select name="read-status" id="book__readStatus">
                                         <option value="read">read</option>
                                         <option value="reading">reading</option>
-                                        <option value="to-read">plan to read</option>
+                                        <option value="plan to read">plan to read</option>
                                     </select>
                                 </div>
-                                <div class="td">
-                                    <textarea id="book__notes"></textarea>
+                                <div class="td book-input">
+                                    <textarea id="book__notes" placeholder="notes"></textarea>
                                 </div>
-                                <div class="td">
+                                <div class="td book-input">
                                     <input id="library__book-submit" type="button" value="Submit" />
                                 </div>
                             </form>

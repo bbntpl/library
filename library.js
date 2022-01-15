@@ -25,7 +25,7 @@ const myLibrary = [{
 }];
 
 // filtered bookshelf
-const myCurrentLibrary = myLibrary;
+const myCurrentLibrary = [...myLibrary];
 
 const myLibraryStatus = {
     sort: {
@@ -102,8 +102,8 @@ function removeBooksInTable() {
 }
 
 //Update the element that presents as the bookshelf of the library
-function updateBookShelf() {
-    myLibrary.forEach((v, i) => updateBookDisplay(i));
+function updateBookShelf(library) {
+    library.forEach((v, i) => updateBookDisplay(i));
 }
 
 //update the bookshelf by adding a set of book info
@@ -125,16 +125,18 @@ function updateBookDisplay(index) {
 }
 
 //Redisplay the presented books from the table
-function redisplayBookshelf() {
+function redisplayBookshelf(library) {
     removeBooksInTable();
-    updateBookShelf();
+    updateBookShelf(library);
 }
 
 //change class and text content to save btn
 function replaceClassNameAndText(element, oldClass, newClass, text) {
-    element.target.classList.remove(oldClass);
-    element.target.classList.add(newClass);
-    element.target.textContent = text;
+    element.classList.remove(oldClass);
+    element.classList.add(newClass);
+    if (text) {
+        element.textContent = text;
+    }
 }
 
 //append button that allow to edit book information
@@ -194,7 +196,7 @@ function removeBook(bookId) {
             myLibrary.splice(i, 1);
         }
     }
-    redisplayBookshelf();
+    redisplayBookshelf(myCurrentLibrary);
 }
 
 function toggleEditMode(toggleBtn, bookId) {
@@ -212,7 +214,7 @@ function toggleEditMode(toggleBtn, bookId) {
 }
 
 function editBook(grandparentEl, toggleBtn, filteredLibrary, bookId) {
-    replaceClassNameAndText(toggleBtn, 'edit-btn', 'save-btn', 'Save');
+    replaceClassNameAndText(toggleBtn.target, 'edit-btn', 'save-btn', 'Save');
     removeChildNodesExceptOneById(grandparentEl, 'td btns-container');
     //insert new children of inputs associated with book property
     for (const prop in filteredLibrary[0]) {
@@ -237,7 +239,7 @@ function editBook(grandparentEl, toggleBtn, filteredLibrary, bookId) {
 }
 
 function updateBook(grandparentEl, toggleBtn, bookId) {
-    replaceClassNameAndText(toggleBtn, 'save-btn', 'edit-btn', 'Edit');
+    replaceClassNameAndText(toggleBtn.target, 'save-btn', 'edit-btn', 'Edit');
 
     /* get the index of the filtered library that matches 
     the given value based on the prop */
@@ -260,8 +262,15 @@ function updateBook(grandparentEl, toggleBtn, bookId) {
     }
 }
 
-function filterBookshelf() {
-
+function filterBookshelf(prop, val) {
+    if(!val){ //if the value is false use the main library instead
+        myCurrentLibrary.splice(0, myCurrentLibrary.length, ...myLibrary);
+        return myCurrentLibrary;
+    } else {
+        const filteredReadStatus = myLibrary.filter(book => book[prop] === val);
+        myCurrentLibrary.splice(0, myCurrentLibrary.length, ...filteredReadStatus);
+        return myCurrentLibrary;
+    }
 }
 
 /*** EVENT LISTENERS */
@@ -272,11 +281,24 @@ bookSubmitBtn.addEventListener('click', (e) => {
 
 bookFilterBtns.forEach(el => {
     el.addEventListener('click', () => {
-
+        if(el.parentElement.classList.contains('status__selected')) return;
+        bookFilterBtns.forEach(el => {
+            replaceClassNameAndText(el.parentElement, 'status__selected', 'status__not-selected', null);
+        });
+        //Set the class of the clicked element parent as active
+        replaceClassNameAndText(el.parentElement, 'status__not-selected', 'status__selected', null);
+        const filterKey = el.id.split('__')[1].replaceAll('-', ' ');
+        if (filterKey !== 'all') {
+            const filteredLibrary = filterBookshelf('readStatus', filterKey);
+            redisplayBookshelf(filteredLibrary);
+        } else {
+            const filteredLibrary = filterBookshelf('readStatus', false);
+            redisplayBookshelf(myLibrary);
+        }
     });
 });
 
 /*** INITIALIZATION */
 if (myLibrary) {
-    updateBookShelf();
+    updateBookShelf(myLibrary);
 }

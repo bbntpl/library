@@ -68,7 +68,7 @@ textarea {
 .top, .footer {
     max-width: 1200px;
     width: 100%;
-    padding: 5em 2em;
+    padding: 3em 2em;
 }
 
 /*** SUBHEADER ***/
@@ -207,6 +207,11 @@ textarea {
 
 .library__book-submission, .td {
     vertical-align: middle;
+}
+
+.table{
+    color: var(--color-cinnamon);
+    text-transform: uppercase;
 }
 
 .book-input>*:not(.btns-container) {

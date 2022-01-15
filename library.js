@@ -10,7 +10,7 @@ const myLibrary = [{
 {
     id: 2,
     title: 'Pro Git',
-    author: '',
+    author: 'Scott Chacon & Ben Straub',
     pages: '261',
     readStatus: 'reading',
     notes: 'Just in case if I wanted to become a Git God one day'
@@ -29,9 +29,10 @@ const myCurrentLibrary = [...myLibrary];
 
 const myLibraryStatus = {
     sort: {
-        category: 'title',
+        category: 'id',
         order: 'ascending'
     },
+    display: 'all',
     totalBooks: myLibrary.length //including removed ones
 }
 
@@ -193,7 +194,9 @@ function submitBook() {
     addBookToTheLibrary(myLibrary, bookTitleVal, bookAuthorVal, bookPagesVal, bookReadStatusVal, bookNotesVal, nextBookId);
     addBookToTheLibrary(myCurrentLibrary, bookTitleVal, bookAuthorVal, bookPagesVal, bookReadStatusVal, bookNotesVal, nextBookId)
     clearBookSubmissionInputs();
-    updateBookDisplay(myCurrentLibrary.length - 1);
+    if(bookReadStatusVal === 'all' || bookReadStatusVal !== myLibraryStatus.display){
+        updateBookDisplay(myCurrentLibrary.length - 1);
+    }
     incrementTotalBooks();
 }
 
@@ -203,7 +206,8 @@ function removeBook(bookId) {
             myLibrary.splice(i, 1);
         }
     }
-    redisplayBookshelf(myCurrentLibrary);
+    const filteredLibrary = filterBookshelf('readStatus', validateBookStatusDisplay());
+    redisplayBookshelf(filteredLibrary);
 }
 
 function toggleEditMode(toggleBtn, bookId) {
@@ -270,7 +274,8 @@ function updateBook(grandparentEl, toggleBtn, bookId) {
 }
 
 function filterBookshelf(prop, val) {
-    if (!val) { //if the value is false use the main library instead
+    //if the value is false replace the current library with the main library
+    if (!val) { 
         myCurrentLibrary.splice(0, myCurrentLibrary.length, ...myLibrary);
         return myCurrentLibrary;
     } else {
@@ -285,14 +290,28 @@ function filterBookshelf(prop, val) {
 //filter the objects of the library using the included characters of title or author
 function searchbarFilter(str) {
     const newStr = strToLowercaseWithoutSpaces(str);
-    const filteredReadStatus = filterBookshelf('all', false).filter(book => {
+    console.log(myLibraryStatus.display);
+    const filteredReadStatus = filterBookshelf('readStatus', validateBookStatusDisplay()).filter(book => {
         const newTitle = strToLowercaseWithoutSpaces(book.title);
         const newAuthor = strToLowercaseWithoutSpaces(book.author);
         return newTitle.includes(newStr) || newAuthor.includes(newStr);
     });
+    console.log(filteredReadStatus);
     return myCurrentLibrary.splice(0, myCurrentLibrary.length, ...filteredReadStatus);
 }
 
+function updateBookshelfByKeyword(e){
+    const libraryFilteredByKeyword = searchbarFilter(e.target.value);
+    redisplayBookshelf(libraryFilteredByKeyword);
+}
+
+function sortItemsByProperty(prop, order){
+
+}
+
+function validateBookStatusDisplay() {
+    return myLibraryStatus.display === 'all' ? false : myLibraryStatus.display;
+}
 /*** EVENT LISTENERS */
 bookSubmitBtn.addEventListener('click', (e) => {
     e.preventDefault();
@@ -308,19 +327,18 @@ bookFilterBtns.forEach(el => {
         //Set the class of the clicked element parent as active
         replaceClassNameAndText(el.parentElement, 'status__not-selected', 'status__selected', null);
         const filterKey = el.id.split('__')[1].replaceAll('-', ' ');
+        myLibraryStatus.display = filterKey;
         if (filterKey !== 'all') {
             const filteredLibrary = filterBookshelf('readStatus', filterKey);
             redisplayBookshelf(filteredLibrary);
         } else {
-            redisplayBookshelf(myLibrary);
+            const filteredLibrary = filterBookshelf('readStatus', false);
+            redisplayBookshelf(filteredLibrary);
         }
     });
 });
 
-searchbarEl.addEventListener('input', (e) => {
-    const libraryFilteredByKeyword = searchbarFilter(e.target.value);
-    redisplayBookshelf(libraryFilteredByKeyword);
-})
+searchbarEl.addEventListener('input', (e) => updateBookshelfByKeyword(e));
 
 /*** INITIALIZATION */
 if (myLibrary) {

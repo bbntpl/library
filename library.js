@@ -32,7 +32,6 @@ const myLibraryStatus = {
         category: 'title',
         order: 'ascending'
     },
-    display: 'all',
     totalBooks: myLibrary.length //including removed ones
 }
 
@@ -45,6 +44,7 @@ const bookAuthorInput = document.getElementById('book__author');
 const bookPagesInput = document.getElementById('book__pages');
 const bookReadStatusInput = document.getElementById('book__readStatus');
 const bookNotesInput = document.getElementById('book__notes');
+const searchbarEl = document.querySelector('.searchbar');
 
 // DOM buttons and links
 const bookSubmitBtn = document.getElementById('library__book-submit');
@@ -72,14 +72,20 @@ function createElementAndInsertBefore(tag, parent, className) {
     }
     return element;
 }
+
 function removeChildNodesExceptOneById(element, id) {
     while (element.firstChild.className !== id) { element.removeChild(element.firstChild) }
 }
+
 function htmlToElement(html) {
     var template = document.createElement('template');
     html = html.trim(); // Never return a text node of whitespace as the result
     template.innerHTML = html;
     return template.content.firstChild;
+}
+
+function strToLowercaseWithoutSpaces(str) {
+    return str.toLowerCase().replaceAll(' ', '');
 }
 
 /*** OBJECT CONSTRUCTOR ***/
@@ -91,8 +97,6 @@ function Book(title, author, pages, status, notes, id) {
     this.readStatus = status;
     this.notes = notes;
 }
-
-/*** HTML MANIPULATION ***/
 
 //remove the elements that display the books in table
 function removeBooksInTable() {
@@ -108,6 +112,7 @@ function updateBookShelf(library) {
 
 //update the bookshelf by adding a set of book info
 function updateBookDisplay(index) {
+    if (!myCurrentLibrary[index]) return;
     const newTableRow = createElementAndAppend('div', bookshelfEl, 'tr');
     const book = myCurrentLibrary[index];
     const bookId = myCurrentLibrary[index].id;
@@ -169,9 +174,9 @@ function clearBookSubmissionInputs() {
 
 /*** ARRAY FUNCTIONS ***/
 //add book to the library
-function addBookToTheLibrary(title, author, pages, status, notes, id) {
+function addBookToTheLibrary(lib, title, author, pages, status, notes, id) {
     const newBook = new Book(title, author, pages, status, notes, id);
-    myLibrary.push(newBook);
+    lib.push(newBook);
 }
 
 const incrementTotalBooks = () => myLibraryStatus.totalBooks++;
@@ -184,9 +189,11 @@ function submitBook() {
     const bookReadStatusVal = bookReadStatusInput.value;
     const bookNotesVal = bookNotesInput.value;
     const nextBookId = myLibraryStatus.totalBooks + 1;
-    addBookToTheLibrary(bookTitleVal, bookAuthorVal, bookPagesVal, bookReadStatusVal, bookNotesVal, nextBookId);
+    //Add the book for the main library and filtered library for display
+    addBookToTheLibrary(myLibrary, bookTitleVal, bookAuthorVal, bookPagesVal, bookReadStatusVal, bookNotesVal, nextBookId);
+    addBookToTheLibrary(myCurrentLibrary, bookTitleVal, bookAuthorVal, bookPagesVal, bookReadStatusVal, bookNotesVal, nextBookId)
     clearBookSubmissionInputs();
-    updateBookDisplay(myLibrary.length - 1);
+    updateBookDisplay(myCurrentLibrary.length - 1);
     incrementTotalBooks();
 }
 
@@ -228,7 +235,7 @@ function editBook(grandparentEl, toggleBtn, filteredLibrary, bookId) {
             const readStatusOptions = ['read', 'reading', 'plan to read'];
             td.append(select);
             readStatusOptions.forEach(v => {
-                select.append(htmlToElement(`<option value="${v}">${v}</option>`));
+                select.append(htmlToElement(`<option value="${v}" ${filteredLibrary[0][prop] === v ? 'selected="selected"' : ''}">${v}</option>`));
             })
         } else if (prop === 'notes') {
             td.append(htmlToElement(`<textarea id="book__${prop}--edit${bookId}" placeholder="notes">${filteredLibrary[0][prop]}</textarea>`));
@@ -263,14 +270,27 @@ function updateBook(grandparentEl, toggleBtn, bookId) {
 }
 
 function filterBookshelf(prop, val) {
-    if(!val){ //if the value is false use the main library instead
+    if (!val) { //if the value is false use the main library instead
         myCurrentLibrary.splice(0, myCurrentLibrary.length, ...myLibrary);
         return myCurrentLibrary;
     } else {
+        //otherwise if the value is a string filter the library
         const filteredReadStatus = myLibrary.filter(book => book[prop] === val);
+        //replace the current library
         myCurrentLibrary.splice(0, myCurrentLibrary.length, ...filteredReadStatus);
         return myCurrentLibrary;
     }
+}
+
+//filter the objects of the library using the included characters of title or author
+function searchbarFilter(str) {
+    const newStr = strToLowercaseWithoutSpaces(str);
+    const filteredReadStatus = filterBookshelf('all', false).filter(book => {
+        const newTitle = strToLowercaseWithoutSpaces(book.title);
+        const newAuthor = strToLowercaseWithoutSpaces(book.author);
+        return newTitle.includes(newStr) || newAuthor.includes(newStr);
+    });
+    return myCurrentLibrary.splice(0, myCurrentLibrary.length, ...filteredReadStatus);
 }
 
 /*** EVENT LISTENERS */
@@ -281,7 +301,7 @@ bookSubmitBtn.addEventListener('click', (e) => {
 
 bookFilterBtns.forEach(el => {
     el.addEventListener('click', () => {
-        if(el.parentElement.classList.contains('status__selected')) return;
+        if (el.parentElement.classList.contains('status__selected')) return;
         bookFilterBtns.forEach(el => {
             replaceClassNameAndText(el.parentElement, 'status__selected', 'status__not-selected', null);
         });
@@ -292,11 +312,15 @@ bookFilterBtns.forEach(el => {
             const filteredLibrary = filterBookshelf('readStatus', filterKey);
             redisplayBookshelf(filteredLibrary);
         } else {
-            const filteredLibrary = filterBookshelf('readStatus', false);
             redisplayBookshelf(myLibrary);
         }
     });
 });
+
+searchbarEl.addEventListener('input', (e) => {
+    const libraryFilteredByKeyword = searchbarFilter(e.target.value);
+    redisplayBookshelf(libraryFilteredByKeyword);
+})
 
 /*** INITIALIZATION */
 if (myLibrary) {

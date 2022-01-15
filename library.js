@@ -1,28 +1,34 @@
+/*** LOCAL STORAGE ***/
+const updateLocalStorage = (name, array) => localStorage.setItem(name, JSON.stringify(array));
+const getItemFromLocal = (name) => JSON.parse(localStorage.getItem(name));
+const deleteLocalStorage = (name) => localStorage.removeItem(name);
+
 /*** DATABASE ***/
-const myLibrary = [{
-    id: 1,
-    title: 'The Body Keeps The Score',
-    author: 'Bessel van der Kolk',
-    pages: '464',
-    readStatus: 'plan to read',
-    notes: 'Gut is an underrated organ',
-},
-{
-    id: 2,
-    title: 'Pro Git',
-    author: 'Scott Chacon & Ben Straub',
-    pages: '261',
-    readStatus: 'reading',
-    notes: 'Just in case if I wanted to become a Git God one day'
-},
-{
-    id: 3,
-    title: 'Atomic Habits',
-    author: 'James Clear',
-    pages: '400',
-    readStatus: 'read',
-    notes: 'Best read of 2021',
-}];
+const myLibrary =
+    window.localStorage.getItem('myLibrary') ? getItemFromLocal('myLibrary') : [{
+        id: 1,
+        title: 'The Body Keeps The Score',
+        author: 'Bessel van der Kolk',
+        pages: '464',
+        readStatus: 'plan to read',
+        notes: 'Gut is an underrated organ',
+    },
+    {
+        id: 2,
+        title: 'Pro Git',
+        author: 'Scott Chacon & Ben Straub',
+        pages: '261',
+        readStatus: 'reading',
+        notes: 'Just in case if I wanted to become a Git God one day'
+    },
+    {
+        id: 3,
+        title: 'Atomic Habits',
+        author: 'James Clear',
+        pages: '400',
+        readStatus: 'read',
+        notes: 'Best read of 2021',
+    }];
 
 // filtered bookshelf
 const myCurrentLibrary = [...myLibrary];
@@ -50,7 +56,7 @@ const searchbarEl = document.querySelector('.searchbar');
 // DOM buttons and links
 const bookSubmitBtn = document.getElementById('library__book-submit');
 const bookFilterBtns = document.querySelectorAll('.book-status__filter');
-
+const clearLocalDataBtn = document.querySelector('.clear-data__local');
 
 /*** HELPER FUNCTIONS ***/
 function createElementAndAppend(tag, parent, className) {
@@ -109,6 +115,10 @@ function removeBooksInTable() {
 //Update the element that presents as the bookshelf of the library
 function updateBookShelf(library) {
     library.forEach((v, i) => updateBookDisplay(i));
+}
+
+function clearLibraryData() {
+    myLibrary.splice(0,myLibrary.length);
 }
 
 //update the bookshelf by adding a set of book info
@@ -194,10 +204,11 @@ function submitBook() {
     addBookToTheLibrary(myLibrary, bookTitleVal, bookAuthorVal, bookPagesVal, bookReadStatusVal, bookNotesVal, nextBookId);
     addBookToTheLibrary(myCurrentLibrary, bookTitleVal, bookAuthorVal, bookPagesVal, bookReadStatusVal, bookNotesVal, nextBookId)
     clearBookSubmissionInputs();
-    if(bookReadStatusVal === 'all' || bookReadStatusVal !== myLibraryStatus.display){
+    if (bookReadStatusVal === 'all' || bookReadStatusVal !== myLibraryStatus.display) {
         updateBookDisplay(myCurrentLibrary.length - 1);
     }
     incrementTotalBooks();
+    updateLocalStorage('myLibrary', myLibrary);
 }
 
 function removeBook(bookId) {
@@ -208,6 +219,7 @@ function removeBook(bookId) {
     }
     const filteredLibrary = filterBookshelf('readStatus', validateBookStatusDisplay());
     redisplayBookshelf(filteredLibrary);
+    updateLocalStorage('myLibrary', myLibrary);
 }
 
 function toggleEditMode(toggleBtn, bookId) {
@@ -271,11 +283,12 @@ function updateBook(grandparentEl, toggleBtn, bookId) {
             td.textContent = myLibrary[index][prop];
         }
     }
+    updateLocalStorage('myLibrary', myLibrary);
 }
 
 function filterBookshelf(prop, val) {
     //if the value is false replace the current library with the main library
-    if (!val) { 
+    if (!val) {
         myCurrentLibrary.splice(0, myCurrentLibrary.length, ...myLibrary);
         return myCurrentLibrary;
     } else {
@@ -300,24 +313,38 @@ function searchbarFilter(str) {
     return myCurrentLibrary.splice(0, myCurrentLibrary.length, ...filteredReadStatus);
 }
 
-function updateBookshelfByKeyword(e){
+function updateBookshelfByKeyword(e) {
     const libraryFilteredByKeyword = searchbarFilter(e.target.value);
     redisplayBookshelf(libraryFilteredByKeyword);
 }
 
-function sortItemsByProperty(prop, order){
+function sortItemsByProperty(prop, order) {
 
 }
 
 function validateBookStatusDisplay() {
     return myLibraryStatus.display === 'all' ? false : myLibraryStatus.display;
 }
-/*** EVENT LISTENERS */
+
+function confirmLocalStorageDeletion(name) {
+    if(!getItemFromLocal(name)) return;
+    const confirmAction = confirm("Are you sure you want to clear the local data?");
+    if (confirmAction) {
+        alert("Action successfully executed");
+        deleteLocalStorage('myLibrary');
+        clearLibraryData();
+        redisplayBookshelf(myLibrary);
+        console.log(getItemFromLocal('myLibrary'));
+    } else {
+        alert("Action canceled");
+    }
+}
+
+/*** EVENT LISTENERS ***/
 bookSubmitBtn.addEventListener('click', (e) => {
     e.preventDefault();
     submitBook();
 });
-
 bookFilterBtns.forEach(el => {
     el.addEventListener('click', () => {
         if (el.parentElement.classList.contains('status__selected')) return;
@@ -337,10 +364,10 @@ bookFilterBtns.forEach(el => {
         }
     });
 });
-
 searchbarEl.addEventListener('input', (e) => updateBookshelfByKeyword(e));
+clearLocalDataBtn.addEventListener('click', () => confirmLocalStorageDeletion('myLibrary'));
 
-/*** INITIALIZATION */
+/*** INITIALIZATION ***/
 if (myLibrary) {
     updateBookShelf(myLibrary);
 }

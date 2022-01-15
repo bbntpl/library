@@ -71,6 +71,25 @@ textarea {
     padding: 3em 2em;
 }
 
+/*** TOP HEADER ***/
+.signin-wrapper{
+    display: flex;
+    align-items: center;
+    background: #fff;
+}
+.signin-wrapper > button{
+    background: transparent;
+    border: 0;
+    font-size: clamp(1rem, 1.2vw, 2rem);
+}
+.signin-wrapper > *{
+    padding: 8px 6px;
+}
+.google-icon-wrapper{
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+}
 /*** SUBHEADER ***/
 
 .status__selected {
@@ -85,12 +104,12 @@ textarea {
     background: var(--color-peach-puff);
 }
 
-.book-status {
+.book-status, .data-status {
     background-color: #fff;
     margin: 1.5em 0;
 }
 
-.book-status__filter {
+.book-status__filter, .clear-data__local {
     padding: 10px 12px;
     color: var(--color-cinnamon);
     border: none;
@@ -101,11 +120,11 @@ textarea {
     width: 100%;
 }
 
-.book-status__item:hover {
+.book-status__item:hover, .data-status__item:hover {
     background-color: var(--color-cinnamon);
 }
 
-.book-status__item:hover>button {
+.book-status__item:hover>button, .data-status__item:hover>button {
     color: #fff;
 }
 
@@ -145,6 +164,8 @@ textarea {
     border-collapse: collapse;
     table-layout: fixed;
     max-height: 60vh;
+    color: var(--color-cinnamon);
+    text-transform: uppercase;
 }
 
 .thead {
@@ -209,14 +230,28 @@ textarea {
     vertical-align: middle;
 }
 
-.table{
-    color: var(--color-cinnamon);
-    text-transform: uppercase;
-}
-
 .book-input>*:not(.btns-container) {
     width: 100%;
     max-width: 130px;
+}
+
+.library__book-submission input, .library__book-submission textarea{
+    border: 3px solid var(--color-peach-puff);
+}
+
+.library__book-submission select{
+    border: 3px solid var(--color-peach-puff);
+    background-color: var(--color-peach-puff);
+}
+
+.tr:nth-child(even) select, .tr:nth-child(even) input, .tr:nth-child(even) textarea {
+    border: 3px solid #fff;
+    background-color: #fff;
+}
+
+.tr:nth-child(odd) select, .tr:nth-child(odd) input, .tr:nth-child(odd) textarea {
+    border: 3px solid var(--color-peach-puff);
+    background-color: var(--color-peach-puff);
 }
 
 .tr:nth-child(odd) .btns-container>button, #library__book-submit {

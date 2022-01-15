@@ -8,7 +8,7 @@
     --color-coral: #ff7f50;
     --color-light-salmon: #ffa07a;
     --color-orangered: #ff4500;
-    --color-nutmeg-wood-finish: #6d3500;
+    --color-cinnamon: #7e3d00;
 }
 
 /*** GLOBAL SELECTORS ***/
@@ -74,7 +74,11 @@ textarea {
 /*** SUBHEADER ***/
 
 .status__selected {
-    background-color: #fff;
+    background-color: var(--color-cinnamon);
+}
+
+.status__selected>button {
+    color: #fff;
 }
 
 .status__not-selected {
@@ -86,9 +90,9 @@ textarea {
     margin: 1.5em 0;
 }
 
-.book-status__filter{
+.book-status__filter {
     padding: 10px 12px;
-    color: var(--color-nutmeg-wood-finish);
+    color: var(--color-cinnamon);
     border: none;
     background: transparent;
     text-transform: uppercase;
@@ -97,8 +101,12 @@ textarea {
     width: 100%;
 }
 
-.book-status__item:hover{
-    background-color: #fff;
+.book-status__item:hover {
+    background-color: var(--color-cinnamon);
+}
+
+.book-status__item:hover>button {
+    color: #fff;
 }
 
 .searchbar-form {
@@ -173,10 +181,6 @@ textarea {
     background-color: var(--color-peach-puff);
 }
 
-.tr:not(:first-child):hover {
-    background-color: var(--color-peach);
-}
-
 .table .th, .td {
     border: 1px solid var(--color-gallery);
 }
@@ -189,15 +193,15 @@ textarea {
     max-width: 200px;
 }
 
-.book__info-text{
+.book__info-text {
     background-color: var(--color-peach-puff);
 }
 
-.book__info-text > a{
-    color: var(--color-nutmeg-wood-finish);
+.book__info-text>a {
+    color: var(--color-cinnamon);
 }
 
-.book__info-text > a:hover{
+.book__info-text>a:hover {
     text-decoration: underline;
 }
 
@@ -205,14 +209,36 @@ textarea {
     vertical-align: middle;
 }
 
-.book-input > *:not(.btns-container) {
+.book-input>*:not(.btns-container) {
     width: 100%;
     max-width: 130px;
+}
+
+.tr:nth-child(odd) .btns-container>button, #library__book-submit {
+    border: 2px solid var(--color-cinnamon);
+    background-color: transparent;
+    color: var(--color-cinnamon);
+}
+
+.tr:nth-child(odd) .btns-container>button:hover, #library__book-submit:hover {
+    background-color: var(--color-cinnamon);
+    color: #fff;
+}
+
+.tr:nth-child(even) .btns-container>button {
+    border: 2px solid #fff;
+    background-color: transparent;
+}
+
+.tr:nth-child(even) .btns-container>button:hover {
+    background-color: #fff;
 }
 
 .edit-btn, .save-btn {
     margin-right: 5px;
 }
+
+
 
 /*** FOOTER ***/
 .footer {
@@ -220,5 +246,5 @@ textarea {
 }
 
 .footer-author>a {
-    color: var(--color-nutmeg-wood-finish);
+    color: var(--color-cinnamon);
 }

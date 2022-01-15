@@ -5,7 +5,7 @@ const myLibrary = [{
     author: 'Bessel van der Kolk',
     pages: '464',
     readStatus: 'plan to read',
-    notes: '',
+    notes: 'Gut is an underrated organ',
 },
 {
     id: 2,
@@ -13,7 +13,7 @@ const myLibrary = [{
     author: '',
     pages: '261',
     readStatus: 'reading',
-    notes: ''
+    notes: 'Just in case if I wanted to become a Git God one day'
 },
 {
     id: 3,
@@ -21,7 +21,7 @@ const myLibrary = [{
     author: 'James Clear',
     pages: '400',
     readStatus: 'read',
-    notes: 'Best read of 2020',
+    notes: 'Best read of 2021',
 }];
 
 // filtered bookshelf
@@ -214,13 +214,13 @@ function toggleEditMode(toggleBtn, bookId) {
 function editBook(grandparentEl, toggleBtn, filteredLibrary, bookId) {
     replaceClassNameAndText(toggleBtn, 'edit-btn', 'save-btn', 'Save');
     removeChildNodesExceptOneById(grandparentEl, 'td btns-container');
-    //insert new children of inputs
+    //insert new children of inputs associated with book property
     for (const prop in filteredLibrary[0]) {
         if (prop === 'id') continue;
         //insert a div with td class element before the first child
         const td = createElementAndInsertBefore('div', grandparentEl, ['td', 'book-input']);
 
-        //insert a child conditional to the prop key
+        //insert a child based on the target prop key
         if (prop === 'readStatus') {
             const select = htmlToElement(`<select name="read-status" id="book__${prop}--edit${bookId}"></select>`)
             const readStatusOptions = ['read', 'reading', 'plan to read'];

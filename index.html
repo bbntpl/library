@@ -6,6 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="styles/reset.css" />
     <link rel="stylesheet" href="styles/main.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">     <title>Your Library</title>
     <title>Your Library</title>
     <link rel="icon" href="favicon.png" />
     <script src="https://kit.fontawesome.com/ed247afa0e.js" crossorigin="anonymous"></script>
@@ -15,8 +18,14 @@
     <div class="main-container">
         <div class="top">
             <header class="header">
-                <h1 class="header-title">My Library</h1>
-                <div class="signin-wrapper">
+
+                <div class="user__profile">
+                    <div class="avatar-wrapper">
+                        <img class="library__photo-id avatar" />
+                    </div>
+                    <h1 id="library__name" class="header-title">My Library</h1>
+                </div>
+                <div class="auth-btn-wrapper">
                     <div class="google-icon-wrapper">
                         <svg height="100%" width="100%" viewBox="0 0 20 20" focusable="false">
                             <path
@@ -33,7 +42,7 @@
                                 fill="#EA4335"></path>
                         </svg>
                     </div>
-                    <button class="signin-btn">Sign in</button>
+                    <button class="auth-btn signin-btn">Sign in</button>
                 </div>
             </header>
             <main class="main">
@@ -79,11 +88,11 @@
                     <div class="table">
                         <div class="thead">
                             <div class="tr">
-                                <div class="book__info-text th"><a href="/">Title</a></div>
-                                <div class="book__info-text th"><a href="/">Author</a></div>
-                                <div class="book__info-text th"><a href="/">Pages</a></div>
-                                <div class="book__info-text th"><a href="/">Status</a></div>
-                                <div class="book__info-text th"><a href="/">Notes</a></div>
+                                <div class="book__info-text th">Title</div>
+                                <div class="book__info-text th">Author</div>
+                                <div class="book__info-text th">Pages</div>
+                                <div class="book__info-text th">Status</div>
+                                <div class="book__info-text th">Notes</div>
                                 <div class="book__info-text th">&nbsp;</div>
                             </div>
                         </div>
@@ -126,6 +135,8 @@
         </footer>
     </div>
 </body>
-<script src="library.js"></script>
+<script type="module" src="./src/init.js"></script>
+<!-- <script type="module" src="./src/firebase.js"></script> -->
+<script type="module" src="./src/library.js"></script>
 
 </html>

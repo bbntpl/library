@@ -1,3 +1,90 @@
+import { app } from './init.js';
+import {
+    getAuth,
+    GoogleAuthProvider,
+    signInWithPopup,
+    signOut
+} from "../node_modules/firebase/firebase-auth.js";
+import { getDatabase, ref } from "../node_modules/firebase/firebase-database.js";
+
+/*** FIREBASE ***/
+const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
+function uploadBookToCloud(bookId, title, author, pages, readStatus, notes, uid) {
+    const db = getDatabase(app);
+    const libraryRef = ref(db, `users/${uid}/myLibrary`);
+    //const newPostRef = push(postListRef);
+    set(libraryRef, {
+        id: bookId,
+        title: title,
+        author: author,
+        pages: pages,
+        readStatus: readStatus,
+        notes: notes,
+    });
+}
+
+function removeBookFromCloud() {
+
+}
+
+function editBookOnCloud() {
+
+}
+function uploadLibraryToCloud(uid) {
+    if (!auth.current) return;
+    const db = getDatabase(app);
+    set(ref(db, 'users/' + uid), {
+        id: bookId,
+        title: title,
+        author: author,
+        pages: pages,
+        readStatus: readStatus,
+        notes: notes,
+    });
+}
+
+function retrieveLibraryFromCloud(uid) {
+    const db = getDatabase();
+    const remoteLibraryRef = ref(db, `users/${uid}/library`);
+    remoteLibraryRef.once('value', (snap) => {
+        clearLibraryData();
+        snap.forEach(b => {
+            const book = b.val();
+            const localBook = new Book(book.title, book.author, book.pages, book.status, book.notes, book.id);
+            myLibrary.push(localBook);
+        });
+    });
+    redisplayBookshelf(myLibrary);
+}
+
+function validateSignedInUser() {
+    const auth = getAuth();
+    return !!auth.currentUser;
+}
+
+function validateUserFirstTimeSignedIn(uid) {
+    const db = getDatabase();
+    const userRef = ref(db, `users/${uid}`);
+    return userRef.once('value', snapshot => {
+        if (!snapshot.exists()) {
+            const userData = snapshot.val();
+            uploadLibraryToCloud(uid);
+            return !!userData;
+        }
+    });
+}
+function checkIfLibraryFromCloudExists(userId) {
+    const db = getDatabase();
+    const libraryRef = ref(db, 'users/' + userId + '/library');
+    return libraryRef.once("value", snapshot => {
+        if (snapshot.exists()) {
+            const userData = snapshot.val();
+            return !!userData;
+        }
+    });
+}
+
 /*** LOCAL STORAGE ***/
 const updateLocalStorage = (name, array) => localStorage.setItem(name, JSON.stringify(array));
 const getItemFromLocal = (name) => JSON.parse(localStorage.getItem(name));
@@ -17,9 +104,9 @@ const myLibrary =
         id: 2,
         title: 'Pro Git',
         author: 'Scott Chacon & Ben Straub',
-        pages: '261',
+        pages: '440',
         readStatus: 'reading',
-        notes: 'Just in case if I wanted to become a Git God one day'
+        notes: 'Just in case if I wanted to Git God one day'
     },
     {
         id: 3,
@@ -34,16 +121,15 @@ const myLibrary =
 const myCurrentLibrary = [...myLibrary];
 
 const myLibraryStatus = {
-    sort: {
-        category: 'id',
-        order: 'ascending'
-    },
     display: 'all',
     totalBooks: myLibrary.length //including removed ones
 }
 
 /*** DOM INSTANCES ***/
 const bookshelfEl = document.querySelector('.library__bookshelf');
+const libraryNameEl = document.getElementById('library__name');
+const userProfileImageEl = document.querySelector('.library__photo-id');
+const avatarWrapperEl = document.querySelector('.avatar-wrapper');
 
 // DOM informative elements - inputs
 const bookTitleInput = document.getElementById('book__title');
@@ -56,6 +142,7 @@ const searchbarEl = document.querySelector('.searchbar');
 // DOM buttons and links
 const bookSubmitBtn = document.getElementById('library__book-submit');
 const bookFilterBtns = document.querySelectorAll('.book-status__filter');
+const authBtn = document.querySelector('.auth-btn');
 const clearLocalDataBtn = document.querySelector('.clear-data__local');
 
 /*** HELPER FUNCTIONS ***/
@@ -81,7 +168,9 @@ function createElementAndInsertBefore(tag, parent, className) {
 }
 
 function removeChildNodesExceptOneById(element, id) {
-    while (element.firstChild.className !== id) { element.removeChild(element.firstChild) }
+    while (element.firstChild.className !== id) {
+        element.removeChild(element.firstChild);
+    }
 }
 
 function htmlToElement(html) {
@@ -105,7 +194,24 @@ function Book(title, author, pages, status, notes, id) {
     this.notes = notes;
 }
 
-//remove the elements that display the books in table
+function displayUserProfile(name, photoURL) {
+    avatarWrapperEl.style.visibility = 'visible';
+    avatarWrapperEl.style.width = '40px';
+    avatarWrapperEl.style.height = '40px';
+    userProfileImageEl.src = photoURL;
+    libraryNameEl.textContent = `${name}'s Library`;
+}
+
+function hideUserProfile() {
+    userProfileImageEl.src = '';
+    avatarWrapperEl.style.width = '0px';
+    avatarWrapperEl.style.height = '0px';
+    avatarWrapperEl.style.visibility = 'hidden';
+    libraryNameEl.textContent = 'My Library';
+}
+
+//undisplay the element that display books info by removing
+//child nodes of the element that contains them
 function removeBooksInTable() {
     while (bookshelfEl.childNodes.length > 2) {
         bookshelfEl.removeChild(bookshelfEl.lastChild);
@@ -117,8 +223,9 @@ function updateBookShelf(library) {
     library.forEach((v, i) => updateBookDisplay(i));
 }
 
+//empty the library array
 function clearLibraryData() {
-    myLibrary.splice(0,myLibrary.length);
+    myLibrary.splice(0, myLibrary.length);
 }
 
 //update the bookshelf by adding a set of book info
@@ -265,7 +372,7 @@ function updateBook(grandparentEl, toggleBtn, bookId) {
     replaceClassNameAndText(toggleBtn.target, 'save-btn', 'edit-btn', 'Edit');
 
     /* get the index of the filtered library that matches 
-    the given value based on the prop */
+    the value of the id */
     const index = myLibrary.map(o => o.id).indexOf(bookId);
 
     //update the property of the the selected book
@@ -286,15 +393,16 @@ function updateBook(grandparentEl, toggleBtn, bookId) {
     updateLocalStorage('myLibrary', myLibrary);
 }
 
-function filterBookshelf(prop, val) {
-    //if the value is false replace the current library with the main library
-    if (!val) {
+function filterBookshelf(prop, status) {
+    // !status === the book display is not filtered then it'll replace the current
+    // library with main library
+    if (!status) {
         myCurrentLibrary.splice(0, myCurrentLibrary.length, ...myLibrary);
         return myCurrentLibrary;
     } else {
         //otherwise if the value is a string filter the library
-        const filteredReadStatus = myLibrary.filter(book => book[prop] === val);
-        //replace the current library
+        const filteredReadStatus = myLibrary.filter(book => book[prop] === status);
+        //replace the current library with the filtered library
         myCurrentLibrary.splice(0, myCurrentLibrary.length, ...filteredReadStatus);
         return myCurrentLibrary;
     }
@@ -302,14 +410,14 @@ function filterBookshelf(prop, val) {
 
 //filter the objects of the library using the included characters of title or author
 function searchbarFilter(str) {
+    //making sure both keyword and the keyword being searched
+    //have the same pattern casing
     const newStr = strToLowercaseWithoutSpaces(str);
-    console.log(myLibraryStatus.display);
     const filteredReadStatus = filterBookshelf('readStatus', validateBookStatusDisplay()).filter(book => {
         const newTitle = strToLowercaseWithoutSpaces(book.title);
         const newAuthor = strToLowercaseWithoutSpaces(book.author);
         return newTitle.includes(newStr) || newAuthor.includes(newStr);
     });
-    console.log(filteredReadStatus);
     return myCurrentLibrary.splice(0, myCurrentLibrary.length, ...filteredReadStatus);
 }
 
@@ -318,25 +426,18 @@ function updateBookshelfByKeyword(e) {
     redisplayBookshelf(libraryFilteredByKeyword);
 }
 
-function sortItemsByProperty(prop, order) {
-
-}
-
 function validateBookStatusDisplay() {
     return myLibraryStatus.display === 'all' ? false : myLibraryStatus.display;
 }
 
 function confirmLocalStorageDeletion(name) {
-    if(!getItemFromLocal(name)) return;
+    if (!getItemFromLocal(name)) return;
     const confirmAction = confirm("Are you sure you want to clear the local data?");
     if (confirmAction) {
-        alert("Action successfully executed");
         deleteLocalStorage('myLibrary');
         clearLibraryData();
         redisplayBookshelf(myLibrary);
         console.log(getItemFromLocal('myLibrary'));
-    } else {
-        alert("Action canceled");
     }
 }
 
@@ -364,10 +465,60 @@ bookFilterBtns.forEach(el => {
         }
     });
 });
-searchbarEl.addEventListener('input', (e) => updateBookshelfByKeyword(e));
 clearLocalDataBtn.addEventListener('click', () => confirmLocalStorageDeletion('myLibrary'));
+searchbarEl.addEventListener('input', (e) => updateBookshelfByKeyword(e));
+authBtn.addEventListener('click', (e) => {
+    if (authBtn.classList.contains('signin-btn')) {
+        signInWithPopup(auth, provider)
+            .then((result) => {
+                console.log('user signed in successfully');
+                // The signed-in user info.
+                const user = result.user;
+                const uid = user.uid;
+                //Add auth profile
+                displayUserProfile(user.displayName, user.photoURL)
+                replaceClassNameAndText(e.target, 'signin-btn', 'signout-btn', 'Sign out');
+                //retrieveLibraryFromCloud(uid);
+
+                validateUserFirstTimeSignedIn(uid);
+                //checkIfLibraryFromCloudExists(token);
+                // ...
+            }).catch((error) => {
+                const credential = GoogleAuthProvider.credentialFromError(error);
+                console.error('Error Code: ' + error.code);
+                console.error('Error Message: ' + error.message);
+                console.error('Error Email: ' + error.email)
+                console.error('Credential Error:' + credential);
+            });
+    } else if (authBtn.classList.contains('signout-btn')) {
+        signOut(auth).then(() => {
+            console.log('user signed out successfully');
+            hideUserProfile();
+            replaceClassNameAndText(e.target, 'signout-btn', 'signin-btn', 'Sign in');
+        }).catch((error) => {
+            console.error('Error Code: ' + error.code);
+            console.error('Error Message: ' + error.message);
+            console.error('Error Email: ' + error.email)
+            console.error('Credential Error:' + credential);
+        });
+    }
+})
 
 /*** INITIALIZATION ***/
 if (myLibrary) {
     updateBookShelf(myLibrary);
 }
+
+auth.onAuthStateChanged(function (user) {
+    if (user) {
+        console.log('User is signed in successfully')
+        displayUserProfile(user.displayName, user.photoURL)
+        replaceClassNameAndText(authBtn, 'signin-btn', 'signout-btn', 'Sign out');
+        console.log(validateUserFirstTimeSignedIn);
+        if (validateSignedInUser()) {
+        // retrieveLibraryFromCloud(uid);
+        // } else {
+
+        // }
+    }
+});

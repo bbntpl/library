@@ -17,7 +17,7 @@
 }
 
 body {
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: 'Open Sans', Arial, Helvetica, sans-serif;
     font-size: 15px;
 }
 
@@ -61,10 +61,6 @@ textarea {
     width: 100%;
 }
 
-.header-title {
-    font-size: clamp(2em, 3vw, 4em);
-}
-
 .top, .footer {
     max-width: 1200px;
     width: 100%;
@@ -72,23 +68,47 @@ textarea {
 }
 
 /*** TOP HEADER ***/
-.signin-wrapper{
+.user__profile{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.header-title {
+    font-size: clamp(1.6em, 2.1vw, 3.2em);
+    margin-left: 20px;
+}
+.library__photo-id{
+    background-size: cover;
+    border-radius: 50%;
+}
+.avatar-wrapper{
+    visibility: hidden;
+    width: 0px;
+    height: 0px;
+}
+.avatar{
+    width: 100%;
+    height: 100%;
+}
+.auth-btn-wrapper{
     display: flex;
     align-items: center;
     background: #fff;
 }
-.signin-wrapper > button{
+
+.auth-btn{
     background: transparent;
     border: 0;
-    font-size: clamp(1rem, 1.2vw, 2rem);
+    font-size: clamp(1rem, 1vw, 2rem);
+    padding: 10px 10px 10px 40px;
 }
-.signin-wrapper > *{
-    padding: 8px 6px;
-}
+
 .google-icon-wrapper{
+    position: absolute;
     width: 40px;
     height: 40px;
     cursor: pointer;
+    padding: 8px 6px;
 }
 /*** SUBHEADER ***/
 
@@ -105,8 +125,12 @@ textarea {
 }
 
 .book-status, .data-status {
-    background-color: #fff;
     margin: 1.5em 0;
+    font-size: clamp(.8rem, 1vw, 1.7rem);
+}
+
+.data-status{
+    background: #fff;
 }
 
 .book-status__filter, .clear-data__local {
@@ -114,7 +138,7 @@ textarea {
     color: var(--color-cinnamon);
     border: none;
     background: transparent;
-    text-transform: uppercase;
+    text-transform: capitalize;
     font-size: inherit;
     height: 100%;
     width: 100%;
@@ -165,7 +189,7 @@ textarea {
     table-layout: fixed;
     max-height: 60vh;
     color: var(--color-cinnamon);
-    text-transform: uppercase;
+    text-transform: capitalize;
 }
 
 .thead {
@@ -187,6 +211,11 @@ textarea {
 
 .td, .th, .tr {
     padding: 8px 4px;
+    font-size: clamp(.9rem, .8vw, 1.6rem);
+    text-align: start;
+}
+
+.td:last-child, .th:last-child, .tr:last-child{
     text-align: center;
 }
 
@@ -198,16 +227,8 @@ textarea {
     max-width: 100px;
 }
 
-.tr:nth-child(even) {
-    background-color: var(--color-peach-puff);
-}
-
 .table .th, .td {
     border: 1px solid var(--color-gallery);
-}
-
-.book__pages--info {
-    max-width: 100px;
 }
 
 .book__notes--info {
@@ -244,41 +265,31 @@ textarea {
     background-color: var(--color-peach-puff);
 }
 
-.tr:nth-child(even) select, .tr:nth-child(even) input, .tr:nth-child(even) textarea {
-    border: 3px solid #fff;
-    background-color: #fff;
-}
-
-.tr:nth-child(odd) select, .tr:nth-child(odd) input, .tr:nth-child(odd) textarea {
+.tr select, .tr input, .tr textarea {
     border: 3px solid var(--color-peach-puff);
     background-color: var(--color-peach-puff);
 }
 
-.tr:nth-child(odd) .btns-container>button, #library__book-submit {
+.btns-container>button, #library__book-submit {
     border: 2px solid var(--color-cinnamon);
     background-color: transparent;
     color: var(--color-cinnamon);
 }
 
-.tr:nth-child(odd) .btns-container>button:hover, #library__book-submit:hover {
+.btns-container>button:hover, #library__book-submit:hover {
     background-color: var(--color-cinnamon);
     color: #fff;
-}
-
-.tr:nth-child(even) .btns-container>button {
-    border: 2px solid #fff;
-    background-color: transparent;
-}
-
-.tr:nth-child(even) .btns-container>button:hover {
-    background-color: #fff;
 }
 
 .edit-btn, .save-btn {
     margin-right: 5px;
 }
 
-
+.btns-container > * {
+    border: 2px solid var(--color-cinnamon);
+    background-color: transparent;
+    color: var(--color-cinnamon);
+}
 
 /*** FOOTER ***/
 .footer {
@@ -287,4 +298,46 @@ textarea {
 
 .footer-author>a {
     color: var(--color-cinnamon);
+}
+
+/*** VIEWPORT MEDIA ***/
+@media screen and (max-width: 768px){
+    .top, .footer {
+        max-width: 1200px;
+        width: 100%;
+        padding: 3em .25em;
+    }
+    .book-status tr {
+        display: flex;
+        flex-wrap: wrap;
+    }
+    .edit-btn, .save-btn {
+        margin-right: 5px;
+        margin-bottom: 5px;
+    }
+    .footer-author {
+        text-align: center;
+    }
+    .td:nth-child(3), .book-input:nth-child(3), .book__info-text:nth-child(3) {
+        display: none;
+    }
+    .td:nth-child(5), .book-input:nth-child(5), .book__info-text:nth-child(5) {
+        display: none;
+    }
+    .book-status__filter, .clear-data__local {
+        padding: 6px 8px;
+    }
+}
+
+@media screen and (max-width: 640px){
+    .book-input > * {
+        height: 100%;
+
+    }
+    .tr:nth-child(2n+1) select, .tr:nth-child(2n+1) input, .tr:nth-child(2n+1) textarea{
+        background-color: #fff;
+    }
+    .book-input {
+        padding: 0;
+    }
 }

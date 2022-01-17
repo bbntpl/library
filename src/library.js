@@ -4,95 +4,31 @@ import {
     GoogleAuthProvider,
     signInWithPopup,
     signOut
-} from "../node_modules/firebase/firebase-auth.js";
-import { getDatabase, ref } from "../node_modules/firebase/firebase-database.js";
-
-/*** FIREBASE ***/
-const auth = getAuth(app);
-const provider = new GoogleAuthProvider();
-function uploadBookToCloud(bookId, title, author, pages, readStatus, notes, uid) {
-    const db = getDatabase(app);
-    const libraryRef = ref(db, `users/${uid}/myLibrary`);
-    //const newPostRef = push(postListRef);
-    set(libraryRef, {
-        id: bookId,
-        title: title,
-        author: author,
-        pages: pages,
-        readStatus: readStatus,
-        notes: notes,
-    });
-}
-
-function removeBookFromCloud() {
-
-}
-
-function editBookOnCloud() {
-
-}
-function uploadLibraryToCloud(uid) {
-    if (!auth.current) return;
-    const db = getDatabase(app);
-    set(ref(db, 'users/' + uid), {
-        id: bookId,
-        title: title,
-        author: author,
-        pages: pages,
-        readStatus: readStatus,
-        notes: notes,
-    });
-}
-
-function retrieveLibraryFromCloud(uid) {
-    const db = getDatabase();
-    const remoteLibraryRef = ref(db, `users/${uid}/library`);
-    remoteLibraryRef.once('value', (snap) => {
-        clearLibraryData();
-        snap.forEach(b => {
-            const book = b.val();
-            const localBook = new Book(book.title, book.author, book.pages, book.status, book.notes, book.id);
-            myLibrary.push(localBook);
-        });
-    });
-    redisplayBookshelf(myLibrary);
-}
-
-function validateSignedInUser() {
-    const auth = getAuth();
-    return !!auth.currentUser;
-}
-
-function validateUserFirstTimeSignedIn(uid) {
-    const db = getDatabase();
-    const userRef = ref(db, `users/${uid}`);
-    return userRef.once('value', snapshot => {
-        if (!snapshot.exists()) {
-            const userData = snapshot.val();
-            uploadLibraryToCloud(uid);
-            return !!userData;
-        }
-    });
-}
-function checkIfLibraryFromCloudExists(userId) {
-    const db = getDatabase();
-    const libraryRef = ref(db, 'users/' + userId + '/library');
-    return libraryRef.once("value", snapshot => {
-        if (snapshot.exists()) {
-            const userData = snapshot.val();
-            return !!userData;
-        }
-    });
-}
+} from '../node_modules/firebase/firebase-auth.js';
+import {
+    getDatabase,
+    ref,
+    child,
+    set,
+    get,
+    onValue,
+    push
+} from '../node_modules/firebase/firebase-database.js';
 
 /*** LOCAL STORAGE ***/
 const updateLocalStorage = (name, array) => localStorage.setItem(name, JSON.stringify(array));
 const getItemFromLocal = (name) => JSON.parse(localStorage.getItem(name));
 const deleteLocalStorage = (name) => localStorage.removeItem(name);
 
+//Firebase features object
+const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
+const db = getDatabase();
+const isUserSignedIn = !!auth.currentUser;
+
 /*** DATABASE ***/
 const myLibrary =
-    window.localStorage.getItem('myLibrary') ? getItemFromLocal('myLibrary') : [{
+    isLocalOrCloudExists() ? retrieveDataFromLocalOrCloud() : [{
         id: 1,
         title: 'The Body Keeps The Score',
         author: 'Bessel van der Kolk',
@@ -123,6 +59,115 @@ const myCurrentLibrary = [...myLibrary];
 const myLibraryStatus = {
     display: 'all',
     totalBooks: myLibrary.length //including removed ones
+}
+
+//Firebase realtime database functions
+function uploadBookToCloud(bookId, title, author, pages, readStatus, notes, uid) {
+    const db = getDatabase(app);
+    const libraryRef = ref(db, `users/${uid}/library`);
+    const newBookRef = push(libraryRef);
+    set(newBookRef, {
+        title: title,
+        author: author,
+        pages: pages,
+        readStatus: readStatus,
+        notes: notes,
+        id: bookId
+    });
+}
+
+function removeBookFromCloud() {
+
+}
+
+function editBookOnCloud() {
+
+}
+
+function uploadLibraryToCloud(uid) {
+    myLibrary.forEach(b => {
+        uploadBookToCloud(b.id, b.title, b.author, b.pages, b.readStatus, b.notes, uid);
+    })
+}
+
+function retrieveLibraryFromCloud(snapshot) {
+    clearLibraryData();
+    snapshot.forEach(b => {
+        const book = b.val();
+        const localBook = new Book(book.title, book.author, book.pages, book.status, book.notes, book.id);
+        myLibrary.push(localBook);
+    });
+    redisplayBookshelf(myLibrary);
+}
+
+function validateUserFirstTimeSignedIn(uid) {
+    const dbRef = ref(db, `users/${uid}`);
+    onValue(dbRef, (snapshot) => {
+        if (snapshot.exists()) {
+            const librarySnapshot = snapshot.val();
+            //retrieve library from cloud if the user is an existing user
+            retrieveLibraryFromCloud(librarySnapshot);
+        } else {
+            //upload library to cloud if user signed in for the first time
+            uploadLibraryToCloud(uid);
+        }
+    }, {
+        onlyOnce: true
+    });
+}
+
+/*** CLOUD OR LOCAL ***/
+function isLocalOrCloudExists() {
+    return !!window.localStorage.getItem('myLibrary') || !!isUserSignedIn;
+}
+
+function uploadLibraryToLocalOrCloud() {
+    if (isUserSignedIn) {
+
+    } else {
+        updateLocalStorage('myLibrary', myLibrary);
+    }
+}
+
+function retrieveDataFromLocalOrCloud() {
+    if (isUserSignedIn) {
+        const user = auth.currentUser;
+        retrieveLibraryFromCloud(user.uid);
+    } else {
+        return getItemFromLocal('myLibrary');
+    }
+}
+
+function uploadBookToLocalOrCloud() {
+    if (isUserSignedIn) {
+
+    } else {
+        updateLocalStorage('myLibrary', myLibrary);
+    }
+}
+
+function updateBookToLocalOrCloud() {
+    if (isUserSignedIn) {
+
+    } else {
+        updateLocalStorage('myLibrary', myLibrary);
+    }
+}
+
+function removeBookFromLocalOrCloud() {
+    if (isUserSignedIn) {
+
+    } else {
+        updateLocalStorage('myLibrary', myLibrary);
+    }
+}
+
+function removeLibraryFromLocalOrCloud() {
+    if (isUserSignedIn) {
+
+    } else {
+        deleteLocalStorage('library');
+    }
 }
 
 /*** DOM INSTANCES ***/
@@ -437,7 +482,6 @@ function confirmLocalStorageDeletion(name) {
         deleteLocalStorage('myLibrary');
         clearLibraryData();
         redisplayBookshelf(myLibrary);
-        console.log(getItemFromLocal('myLibrary'));
     }
 }
 
@@ -478,11 +522,7 @@ authBtn.addEventListener('click', (e) => {
                 //Add auth profile
                 displayUserProfile(user.displayName, user.photoURL)
                 replaceClassNameAndText(e.target, 'signin-btn', 'signout-btn', 'Sign out');
-                //retrieveLibraryFromCloud(uid);
-
                 validateUserFirstTimeSignedIn(uid);
-                //checkIfLibraryFromCloudExists(token);
-                // ...
             }).catch((error) => {
                 const credential = GoogleAuthProvider.credentialFromError(error);
                 console.error('Error Code: ' + error.code);
@@ -511,14 +551,8 @@ if (myLibrary) {
 
 auth.onAuthStateChanged(function (user) {
     if (user) {
-        console.log('User is signed in successfully')
         displayUserProfile(user.displayName, user.photoURL)
         replaceClassNameAndText(authBtn, 'signin-btn', 'signout-btn', 'Sign out');
-        console.log(validateUserFirstTimeSignedIn);
-        if (validateSignedInUser()) {
-        // retrieveLibraryFromCloud(uid);
-        // } else {
-
-        // }
+        validateUserFirstTimeSignedIn(user.uid)
     }
 });

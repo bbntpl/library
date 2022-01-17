@@ -3,9 +3,8 @@ import {
     getAuth,
     GoogleAuthProvider,
     signInWithPopup,
-    signOut,
-    updatePhoneNumber
-} from '../node_modules/firebase/firebase-auth.js';
+    signOut
+} from 'https://www.gstatic.com/firebasejs/9.6.3/firebase-auth.js';
 import {
     getDatabase,
     ref,
@@ -15,7 +14,7 @@ import {
     update,
     remove,
     onValue,
-} from '../node_modules/firebase/firebase-database.js';
+} from 'https://www.gstatic.com/firebasejs/9.6.3/firebase-database.js';
 
 /*** LOCAL STORAGE ***/
 const updateLocalStorage = (name, array) => localStorage.setItem(name, JSON.stringify(array));

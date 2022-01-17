@@ -133,7 +133,7 @@ textarea {
     background: #fff;
 }
 
-.book-status__filter, .clear-data__local {
+.book-status__filter, .clear-data {
     padding: 10px 12px;
     color: var(--color-cinnamon);
     border: none;
@@ -153,6 +153,8 @@ textarea {
 }
 
 .searchbar-form {
+    display: flex;
+    align-self: flex-end;
     background-color: #fff;
 }
 
@@ -324,7 +326,7 @@ textarea {
     .td:nth-child(5), .book-input:nth-child(5), .book__info-text:nth-child(5) {
         display: none;
     }
-    .book-status__filter, .clear-data__local {
+    .book-status__filter, .clear-data {
         padding: 6px 8px;
     }
 }

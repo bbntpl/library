@@ -237,13 +237,15 @@ function strToLowercaseWithoutSpaces(str) {
 }
 
 /*** OBJECT CONSTRUCTOR ***/
-function Book(title, author, pages, status, notes, id) {
-    this.id = id;
-    this.title = title;
-    this.author = author;
-    this.pages = pages;
-    this.readStatus = status;
-    this.notes = notes;
+class Book {
+    constructor(title, author, pages, status, notes, id) {
+        this.id = id;
+        this.title = title;
+        this.author = author;
+        this.pages = pages;
+        this.readStatus = status;
+        this.notes = notes;
+    }
 }
 
 function displayUserProfile(name, photoURL) {

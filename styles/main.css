@@ -191,7 +191,7 @@ textarea {
     table-layout: fixed;
     max-height: 60vh;
     color: var(--color-cinnamon);
-    text-transform: capitalize;
+    text-transform: lowercase;
 }
 
 .thead {
@@ -203,7 +203,7 @@ textarea {
     display: table-row-group;
 }
 
-.tr {
+.tr, .edit-form {
     display: table-row;
 }
 
@@ -221,7 +221,7 @@ textarea {
     text-align: center;
 }
 
-.library__bookshelf .td {
+.library__bookshelf .td, .edit-form {
     width: 100%;
 }
 
@@ -291,6 +291,18 @@ textarea {
     border: 2px solid var(--color-cinnamon);
     background-color: transparent;
     color: var(--color-cinnamon);
+}
+
+.book-inputs{
+    display:block;
+}
+.error{
+    border: 2px solid red;
+}
+
+.err-msg{
+    color: red;
+    font-size:11px;
 }
 
 /*** FOOTER ***/

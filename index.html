@@ -95,13 +95,19 @@
                         <div class="library__bookshelf tbody">
                             <form class="tr library__book-submission">
                                 <div class="td book-input">
-                                    <input id="book__title" type="text" placeholder="title" />
+                                    <input id="book__title" class="book-inputs" type="text" placeholder="title"
+                                        required />
+                                    <span class="err-msg"></span>
                                 </div>
                                 <div class="td book-input">
-                                    <input id="book__author" type="text" placeholder="author" />
+                                    <input id="book__author" class="book-inputs" type="text" placeholder="author"
+                                        required />
+                                    <span class="err-msg"></span>
                                 </div>
                                 <div class="td book-input">
-                                    <input id="book__pages" type="text" placeholder="pages" />
+                                    <input id="book__pages" class="book-inputs" type="number" placeholder="pages"
+                                        max="50000" required />
+                                    <span class="err-msg"></span>
                                 </div>
                                 <div class="td book-input">
                                     <select name="read-status" id="book__readStatus">

@@ -120,21 +120,6 @@ function retrieveLibraryFromCloud(snapshot) {
     redisplayBookshelf(filteredBookshelf);
 }
 
-function getStatusFromCloud(uid) {
-    const dbRef = ref(getDatabase(app));
-    const path = `users/${uid}/status`;
-    get(child(dbRef, path)).then((snapshot) => {
-        if (snapshot.exists()) {
-            const totalBooks = snapshot.val();
-            myLibraryStatus.totalBooks = totalBooks;
-        } else {
-            console.log("No data available");
-        }
-    }).catch((error) => {
-        console.error(error);
-    });
-}
-
 function validateUserFirstTimeSignedIn(uid) {
     const dbRef = ref(db, `users/${uid}`);
     onValue(dbRef, (snapshot) => {
@@ -236,6 +221,17 @@ function strToLowercaseWithoutSpaces(str) {
     return str.toLowerCase().replaceAll(' ', '');
 }
 
+function getChildNodesByTag(child, tag) {
+    const childNodesByTag = [];
+    for (let i = 0; i < child.length; i++) {
+        if (typeof child[i] === 'undefined') continue;
+        if (child[i].tagName === tag) {
+            childNodesByTag.push(child[i]);
+        }
+    }
+    return childNodesByTag;
+}
+
 /*** OBJECT CONSTRUCTOR ***/
 class Book {
     constructor(title, author, pages, status, notes, id) {
@@ -285,7 +281,7 @@ function clearLibraryData() {
 //update the bookshelf by adding a set of book info
 function updateBookDisplay(index) {
     if (!myCurrentLibrary[index]) return;
-    const newTableRow = createElementAndAppend('div', bookshelfEl, 'tr');
+    const newTableRow = createElementAndAppend('form', bookshelfEl, 'tr');
     const book = myCurrentLibrary[index];
     const bookId = myCurrentLibrary[index].id;
     for (const prop in book) {
@@ -322,7 +318,17 @@ function appendEditBook(tableData, bookId) {
     editBtn.textContent = 'Edit';
     editBtn.addEventListener('click', (e) => {
         e.preventDefault();
-        toggleEditMode(e, bookId);
+        const form = e.target.parentElement.parentElement;
+        if (e.target.className === 'save-btn') {
+            const inputChildNodes = [...form.childNodes].map(obj => obj.childNodes[0]);
+            const errChildNodes = [...form.childNodes].map(obj => obj.childNodes[1]);
+            const inputs = getChildNodesByTag(inputChildNodes, 'INPUT');
+            const errMsgs = getChildNodesByTag(errChildNodes, 'SPAN');
+            validateInputs({ inputs, errMsgs });
+        }
+        if (form.checkValidity()) {
+            toggleEditMode(e, bookId);
+        }
     });
 }
 
@@ -417,9 +423,18 @@ function editBook(grandparentEl, toggleBtn, filteredLibrary, bookId) {
                 select.append(htmlToElement(`<option value="${v}" ${filteredLibrary[0][prop] === v ? 'selected="selected"' : ''}">${v}</option>`));
             })
         } else if (prop === 'notes') {
-            td.append(htmlToElement(`<textarea id="book__${prop}--edit${bookId}" placeholder="notes">${filteredLibrary[0][prop]}</textarea>`));
+            td.append(htmlToElement(`<textarea id="book__${prop}--edit${bookId}" 
+            placeholder="notes"
+            >${filteredLibrary[0][prop]}</textarea>`));
         } else {
-            td.append(htmlToElement(`<input id="book__${prop}--edit${bookId}" type="text" placeholder="${prop}" value="${filteredLibrary[0][prop]}"/>`));
+            td.append(htmlToElement(`<input id="book__${prop}--edit${bookId}" 
+            class="book-inputs" 
+            type="text" 
+            placeholder="${prop}" 
+            value="${filteredLibrary[0][prop]}" 
+            required
+            />`));
+            td.append(htmlToElement(`<span class="err-msg"></span>`));
         }
     }
 }
@@ -461,7 +476,6 @@ function filterBookshelfByProp(prop, status) {
         const filteredReadStatus = myLibrary.filter(book => book[prop] === status);
         //replace the current library with the filtered library
         myCurrentLibrary.splice(0, myCurrentLibrary.length, ...filteredReadStatus);
-        console.log(myCurrentLibrary);
         return myCurrentLibrary;
     }
 }
@@ -502,10 +516,36 @@ function confirmLocalStorageDeletion(name, storageName) {
     }
 }
 
+function validateInputs(nodeEls) {
+    const { inputs, errMsgs } = nodeEls;
+    inputs.forEach((input, i) => {
+        if (input.validity.valueMissing) {
+            showError(errMsgs[i], 'Please fill out the input', input);
+        } else if (input.validity.typeMismatch) {
+            showError(errMsgs[i], `You are required to type a ${input.type}`, input);
+        } else {
+            errMsgs[i].textContent = '';
+            input.removeAttribute('style');
+        }
+    });
+}
+
+function showError(err, errText, input) {
+    err.textContent = errText;
+    input.style.border = '2px solid red';
+}
+
 /*** EVENT LISTENERS ***/
 bookSubmitBtn.addEventListener('click', (e) => {
-    e.preventDefault();
-    submitBook();
+    const form = document.getElementsByClassName('library__book-submission')[0];
+    const errMsgs = document.getElementsByClassName('err-msg');
+    const inputs = document.querySelectorAll('.book-inputs');
+
+    validateInputs({ inputs, errMsgs });
+    if (form.checkValidity()) {
+        e.preventDefault();
+        submitBook();
+    }
 });
 bookFilterBtns.forEach(el => {
     el.addEventListener('click', () => {
